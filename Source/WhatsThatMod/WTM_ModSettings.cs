@@ -9,15 +9,15 @@ namespace WhatsThatMod
 {
     public class WTM_ModSettings : ModSettings
     {
-        public bool FlagVanilla;
-        public string VanillaName;
+        public bool FlagVanilla = false;
+        public string VanillaName = "Rimworld";
 
-        public string Format;
-        public bool Italics;
-        public bool Bold;
-        public int CustomSize;
-        public string ColorHex;
-        public int BlankLines;
+        public string Format = "{0}";
+        public bool Italics = true;
+        public bool Bold = false;
+        public int CustomSize = 0;
+        public string ColorHex = "66E0E4FF";
+        public int BlankLines = 1;
 
         public List<string> ExcludedMods = new List<string>();
         public List<string> ExcludedDefTypes = new List<string>();

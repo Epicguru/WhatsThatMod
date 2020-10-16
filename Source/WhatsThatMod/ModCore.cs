@@ -90,7 +90,7 @@ namespace WhatsThatMod
                     var meta = ModLister.GetActiveModWithIdentifier(mcp.PackageId);
                     if (meta == null)
                     {
-                        Log.Error("Failed to get meta from active mod?! Mod can't be checked for exclusion.");
+                        Log.Error($"Failed to get meta from active mod '{mcp.Name}'?! Mod can't be checked for exclusion.");
                     }
                     else
                     {
