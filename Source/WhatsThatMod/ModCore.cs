@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 using Verse;
@@ -90,10 +91,11 @@ namespace WhatsThatMod
                     var meta = ModLister.GetActiveModWithIdentifier(mcp.PackageId);
                     if (meta == null)
                     {
-                        Log.Error($"Failed to get meta from active mod '{mcp.Name}'?! Mod can't be checked for exclusion.");
+                        Log.Error($"Failed to get meta from active mod '{mcp.Name}' ({mcp.PackageId})?! Mod can't be checked for exclusion.");
                     }
                     else
                     {
+                        Log.Message($"Got meta for: {mcp.Name} ({mcp.PackageId}) [{mcp.PackageIdPlayerFacing}]");
                         bool exclude = false;
                         foreach (var excluded in excludedMods)
                         {
@@ -199,6 +201,21 @@ namespace WhatsThatMod
         {
             Instance = this;
             var settings = GetSettings<WTM_ModSettings>(); // Needs to be called to initialize settings.
+            if (settings.IsBroken)
+            {
+                // This indicates a bug. Mod settings file needs to be deleted, and settings reset.
+                var newSettings = new WTM_ModSettings();
+
+                var modField = typeof(ModSettings).GetProperty("Mod", BindingFlags.Public | BindingFlags.Instance);
+                var settingsField = typeof(Mod).GetField("modSettings", BindingFlags.NonPublic | BindingFlags.Instance);
+
+                Log.Message("<color=magenta>WTM: Detected broken mod settings, trying to fix...");
+                //Log.Message($"mf: {modField}, sf: {settingsField}");
+                modField.SetValue(newSettings, this);
+                settingsField.SetValue(this, newSettings);
+                bool worked = newSettings == GetSettings<WTM_ModSettings>() && newSettings.Mod == this;
+                Log.Message($"<color=magenta>WTM: Detected broken settings, attempted fix. Worked: {worked}</color>");
+            }
 
             Log.Message("Loaded What's That Mod. Def descriptions will be written to in static constructor.");
         }
