@@ -91,11 +91,11 @@ namespace WhatsThatMod
                     var meta = ModLister.GetActiveModWithIdentifier(mcp.PackageId);
                     if (meta == null)
                     {
-                        Log.Error($"Failed to get meta from active mod '{mcp.Name}' ({mcp.PackageId})?! Mod can't be checked for exclusion.");
+                        Log.Warning($"Failed to get meta from active mod '{mcp.Name}' ({mcp.PackageId}). This is normally caused by having a local copy and also the steam version installed. Mod can't be checked for exclusion.");
                     }
                     else
                     {
-                        Log.Message($"Got meta for: {mcp.Name} ({mcp.PackageId}) [{mcp.PackageIdPlayerFacing}]");
+                        //Log.Message($"Got meta for: {mcp.Name} ({mcp.PackageId}) [{mcp.PackageIdPlayerFacing}]");
                         bool exclude = false;
                         foreach (var excluded in excludedMods)
                         {
