@@ -26,6 +26,9 @@ namespace WhatsThatMod
         public int CustomSize = 0;
         public string ColorHex = "66E0E4FF";
         public int BlankLines = 1;
+        public bool DetectPatched = true;
+        public bool UltraDeepMode = false;
+        public bool CECompat = true;
 
         public List<string> ExcludedMods = new List<string>();
         public List<string> ExcludedDefTypes = new List<string>();
@@ -74,6 +77,9 @@ namespace WhatsThatMod
             Scribe_Values.Look(ref CustomSize, "CustomSize", 0);
             Scribe_Values.Look(ref ColorHex, "ColorHex", "66E0E4FF");
             Scribe_Values.Look(ref BlankLines, "BlankLines", 1);
+            Scribe_Values.Look(ref DetectPatched, "DetectPatched", true);
+            Scribe_Values.Look(ref UltraDeepMode, "UltraDeepMode", false);
+            Scribe_Values.Look(ref CECompat, "CECompat", true);
 
             Scribe_Collections.Look(ref ExcludedMods, "ExcludedMods", LookMode.Value);
             if (ExcludedMods == null)
@@ -153,6 +159,14 @@ namespace WhatsThatMod
             {
                 // Draw advanced settings.
                 listing.GapLine();
+
+                listing.CheckboxLabeled("WTM_CECompat".Translate(), ref CECompat, "WTM_CECompat_Desc".Translate());
+                listing.CheckboxLabeled("WTM_DetectPatched".Translate(), ref DetectPatched, "WTM_DetectPatched_Desc".Translate());
+
+                if (!DetectPatched)
+                    GUI.enabled = false;
+                listing.CheckboxLabeled("WTM_UltraDeepMode".Translate(), ref UltraDeepMode, "WTM_UltraDeepMode_Desc".Translate());
+                GUI.enabled = true;
 
                 listing.Label("WTM_ExcludedMods".Translate(), tooltip: "WTM_ExcludedMods_Desc".Translate());
                 bool addNew = listing.ButtonText("WTM_AddNew".Translate());

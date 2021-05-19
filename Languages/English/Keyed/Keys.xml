@@ -45,4 +45,20 @@
 <WTM_ModFound>Mod: {0}</WTM_ModFound>
 <WTM_ModNotFound>Installed mod not found. Must type ID, not name!</WTM_ModNotFound>
 
+<WTM_DetectPatched>Detect patched defs</WTM_DetectPatched>
+<WTM_DetectPatched_Desc>If enabled, all active mod's patches are scanned to detect patched defs. This can catch some errors where patched items are not tagged correctly.
+However, scanning all patches can be quite slow, especially with large mod packs.
+You can check the debug log to see how long scanning patches took, and if you would rather the game load faster than have each and every item tagged, you should disable this option.</WTM_DetectPatched_Desc>
+
+<WTM_UltraDeepMode>Deep patch scan</WTM_UltraDeepMode>
+<WTM_UltraDeepMode_Desc>By default this mod will scan patches to look added items, however it will only scan the 'top level' of patches to speed up loading.
+Enabling this option will make the entirety of all patches be scanned, which can be much slower but might catch some patched defs that would otherwise be missed.
+Recommended to leave it disabled, as it is unlikely to have any effect but will always slow down loading. </WTM_UltraDeepMode_Desc>
+
+<WTM_CECompat>Combat Extended compatibility</WTM_CECompat>
+<WTM_CECompat_Desc>When enabled, the ammo stats will be added to the description of all combat extended ammunitions, making it easier to check ammo stats at a glance.</WTM_CECompat_Desc>
+<WTM_AmmoStats>Ammo stats:</WTM_AmmoStats>
+
+<WTM_LoadingMsg>(ノಠ益ಠ)ノ彡┻━┻ WHAT'S THAT MOD?!?</WTM_LoadingMsg>
+
 </LanguageData>

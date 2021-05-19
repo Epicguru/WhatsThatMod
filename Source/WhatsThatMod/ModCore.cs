@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text;
+using System.Xml;
 using UnityEngine;
 using Verse;
 
@@ -78,72 +80,234 @@ namespace WhatsThatMod
                 }
             }
 
-            foreach (var mcp in LoadedModManager.RunningMods)
+            DefWriter(doVanilla, excludedMods, vanillaName, template);
+        }
+
+        private static IEnumerable<Def> EnumerateAllDefs()
+        {
+            foreach (var mod in LoadedModManager.RunningModsListForReading)
             {
+                if (mod == null)
+                    continue;
+
+                foreach (var def in mod.AllDefs)
+                    yield return def;
+            }
+
+            foreach (var def in LoadedModManager.PatchedDefsForReading)
+            {
+                yield return def;
+            }
+        }
+
+        private static void DefWriter(bool doVanilla, HashSet<string> excludedMods, string vanillaName, string template)
+        {
+            #region Resolve patches
+            if (Instance.GetSettings<WTM_ModSettings>().DetectPatched)
+            {
+                var watch = new System.Diagnostics.Stopwatch();
+                watch.Start();
+                foreach (var mcp in LoadedModManager.RunningModsListForReading)
+                {
+                    try
+                    {
+                        TryResolvePatches(mcp);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e.ToString());
+                    }
+                }
+
+                watch.Stop();
+                Log.Message($"  --> [What's That Mod] Took {watch.Elapsed.TotalSeconds:F2} seconds to scan all patches. <--");
+            }
+            #endregion
+
+            var settings = Instance.GetSettings<WTM_ModSettings>();
+
+            int count = 0;
+            int fromPatched = 0;
+            foreach (var def in EnumerateAllDefs())
+            {
+                var mcp = def.modContentPack;
                 if (mcp == null)
+                {
+                    if (probablyAddedBy.TryGetValue(def.defName, out var found))
+                    {
+                        mcp = found;
+                        fromPatched++;
+                        //Log.Message($"Patched def '{def.defName}' has been resolved as being part of '{mcp.Name}'");
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+
+                if (mcp.IsCoreMod && !doVanilla)
+                    continue;
+
+                if(excludedMods.Count > 0 && excludedMods.Contains(mcp.PackageId))
                     continue;
 
                 try
                 {
-                    if (mcp.IsCoreMod && !doVanilla)
+                    string currentDesc = def.description;
+                    if (currentDesc == null)
                         continue;
 
-                    var meta = ModLister.GetActiveModWithIdentifier(mcp.PackageId);
-                    if (meta == null)
-                    {
-                        Log.Warning($"Failed to get meta from active mod '{mcp.Name}' ({mcp.PackageId}). This is normally caused by having a local copy and also the steam version installed. Mod can't be checked for exclusion.");
-                    }
-                    else
-                    {
-                        //Log.Message($"Got meta for: {mcp.Name} ({mcp.PackageId}) [{mcp.PackageIdPlayerFacing}]");
-                        bool exclude = false;
-                        foreach (var excluded in excludedMods)
-                        {
-                            if (meta.SamePackageId(excluded, true))
-                            {
-                                exclude = true;
-                                break;
-                            }
-                        }
+                    string desc = MakeNewDescription(currentDesc, mcp.IsCoreMod ? vanillaName : mcp.Name, template);
 
-                        if (exclude)
-                        {
-                            Log.Message($"Excluding mod '{meta.Name}' from What's That Mod");
-                            continue;
-                        }
+                    if (settings.CECompat && CE_Compat.IsCEInstalled && CE_Compat.AmmoDefType.IsInstanceOfType(def))
+                    {
+                        string ce = CE_Compat.GetProjectileReadout(def as ThingDef);
+                        desc += $"\n\n<color=#f0d90c><b>{"WTM_AmmoStats".Translate()}</b></color>\n{ce ?? "<null>"}";
                     }
 
-                    var defs = mcp.AllDefs;
-                    if (defs == null)
-                        continue;
-
-                    foreach (var def in defs)
-                    {
-                        if (def == null)
-                            continue;
-
-                        Type defType = def.GetType();
-
-                        try
-                        {
-                            string currentDesc = def.description;
-                            if (currentDesc == null)
-                                continue;
-
-                            string desc = MakeNewDescription(currentDesc, mcp.Name, template);
-
-                            def.description = desc;
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Error($"What's That Mod: Exception generating def description for [{defType.Name}] {def.defName} from mod {mcp.Name}:\n{e}");
-                        }
-                    }
+                    def.description = desc;
+                    count++;
                 }
                 catch (Exception e)
                 {
-                    Log.Error($"What's That Mod: Exception when parsing mod's Defs. Mod is {mcp.Name}. Exception:\n{e}");
+                    Log.Error($"What's That Mod: Exception generating def description for [{def.GetType().FullName}] {def.defName} from mod {mcp.Name}:\n{e}");
                 }
+            }
+
+            probablyAddedBy.Clear();
+            Log.Message($"What's That Mod: Wrote to {count} mod descriptions, {fromPatched} patched defs resolved.");
+        }
+
+        private static void TryResolvePatches(ModContentPack mod)
+        {
+            if (mod?.Patches?.EnumerableNullOrEmpty() ?? true)
+                return;
+
+            var settings = Instance.GetSettings<WTM_ModSettings>();
+
+            void ExploreAndTag(XmlNode node, ModContentPack mcp, int depth)
+            {
+                if (node is not XmlElement e)
+                    return;
+
+                if (e.Name == "defName")
+                {
+                    string defName = e.InnerText;
+                    if (probablyAddedBy.ContainsKey(defName))
+                        return;
+                    probablyAddedBy.Add(defName, mcp);
+                    //Log.Message($"{defName} -> {mcp.Name}");
+                }
+                else
+                {
+                    if (e.HasChildNodes && (depth == 0 || (settings.UltraDeepMode && depth < 10)))
+                    {
+                        foreach (XmlNode node2 in e.ChildNodes)
+                        {
+                            ExploreAndTag(node2, mcp, depth + 1);
+                        }
+                    }
+                }
+            }
+
+            foreach (var root in mod.Patches)
+            {
+                foreach (var patch in ExplorePatchTree(root))
+                {
+                    foreach (var container in ExtractPatchData(patch))
+                    {
+                        try
+                        {
+                            foreach(XmlNode node in container.node.ChildNodes)
+                            {
+                                ExploreAndTag(node, mod, 0);
+                            }
+                        }
+                        catch { /* Ignore */ }
+                    }
+                }
+            }
+        }
+
+        private static FieldInfo GetFieldInfo<T>(string name)
+        {
+            return typeof(T).GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
+        }
+
+        private static T GetField<T>(FieldInfo fi, object obj) where T : class
+        {
+            return fi.GetValue(obj) as T;
+        }
+
+        private static readonly Dictionary<string, ModContentPack> probablyAddedBy = new Dictionary<string, ModContentPack>();
+
+        private static readonly FieldInfo cond_match = GetFieldInfo<PatchOperationConditional>("match");
+        private static readonly FieldInfo cond_nomatch = GetFieldInfo<PatchOperationConditional>("nomatch");
+        private static readonly FieldInfo find_match = GetFieldInfo<PatchOperationFindMod>("match");
+        private static readonly FieldInfo find_nomatch = GetFieldInfo<PatchOperationFindMod>("nomatch");
+        private static readonly FieldInfo seq_ops = GetFieldInfo<PatchOperationSequence>("operations");
+
+        private static readonly FieldInfo add_value = GetFieldInfo<PatchOperationAdd>("value");
+        private static readonly FieldInfo insert_value = GetFieldInfo<PatchOperationInsert>("value");
+
+        private static IEnumerable<PatchOperation> ExplorePatchTree(PatchOperation patch)
+        {
+            if (patch == null)
+                yield break;
+
+            switch (patch)
+            {
+                case PatchOperationFindMod find:
+                    foreach (var thing in ExplorePatchTree(GetField<PatchOperation>(find_match, find)))
+                        yield return thing;
+                    foreach (var thing in ExplorePatchTree(GetField<PatchOperation>(find_nomatch, find)))
+                        yield return thing;
+                    break;
+
+                case PatchOperationConditional cond:
+                    foreach (var thing in ExplorePatchTree(GetField<PatchOperation>(cond_match, cond)))
+                        yield return thing;
+                    foreach (var thing in ExplorePatchTree(GetField<PatchOperation>(cond_nomatch, cond)))
+                        yield return thing;
+                    break;
+
+                case PatchOperationSequence seq:
+                    var list = GetField<List<PatchOperation>>(seq_ops, seq);
+                    if (list == null)
+                        break;
+                    
+                    foreach (var item in list)
+                    {
+                        if (item == null)
+                            continue;
+
+                        yield return item;
+                        foreach (var found in ExplorePatchTree(item))
+                            yield return found;
+                    }
+                    
+                    break;
+
+                default:
+                    yield return patch;
+                    break;
+            }
+        }
+
+        private static IEnumerable<XmlContainer> ExtractPatchData(PatchOperation op)
+        {
+            if (op == null)
+                yield break;
+
+            switch (op)
+            {
+                case PatchOperationAdd add:
+                    yield return GetField<XmlContainer>(add_value, add);
+                    break;
+
+                case PatchOperationInsert insert:
+                    yield return GetField<XmlContainer>(insert_value, insert);
+                    break;
             }
         }
 
@@ -200,24 +364,18 @@ namespace WhatsThatMod
         public ModCore(ModContentPack mcp) : base(mcp)
         {
             Instance = this;
-            var settings = GetSettings<WTM_ModSettings>(); // Needs to be called to initialize settings.
-            if (settings.IsBroken)
-            {
-                // This indicates a bug. Mod settings file needs to be deleted, and settings reset.
-                var newSettings = new WTM_ModSettings();
 
-                var modField = typeof(ModSettings).GetProperty("Mod", BindingFlags.Public | BindingFlags.Instance);
-                var settingsField = typeof(Mod).GetField("modSettings", BindingFlags.NonPublic | BindingFlags.Instance);
+            Log.Message("Loaded What's That Mod.");
+            LongEventHandler.QueueLongEvent(Run, "WTM_LoadingMsg", false, null);
+        }
 
-                Log.Message("<color=magenta>WTM: Detected broken mod settings, trying to fix...");
-                //Log.Message($"mf: {modField}, sf: {settingsField}");
-                modField.SetValue(newSettings, this);
-                settingsField.SetValue(this, newSettings);
-                bool worked = newSettings == GetSettings<WTM_ModSettings>() && newSettings.Mod == this;
-                Log.Message($"<color=magenta>WTM: Detected broken settings, attempted fix. Worked: {worked}</color>");
-            }
-
-            Log.Message("Loaded What's That Mod. Def descriptions will be written to in static constructor.");
+        private void Run()
+        {
+            var sw = new Stopwatch();
+            sw.Start();
+            WriteToDefs();
+            sw.Stop();
+            Log.Message($"What's That Mod took {sw.ElapsedMilliseconds} milliseconds to generate all def descriptions.");
         }
 
         public override void DoSettingsWindowContents(Rect inRect)
