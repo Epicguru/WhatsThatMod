@@ -9,6 +9,14 @@ namespace WhatsThatMod
 {
     public class WTM_ModSettings : ModSettings
     {
+        public bool IsBroken
+        {
+            get
+            {
+                return VanillaName == null;
+            }
+        }
+
         public bool FlagVanilla = false;
         public string VanillaName = "Rimworld";
 
