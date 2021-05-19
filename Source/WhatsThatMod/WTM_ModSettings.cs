@@ -145,7 +145,7 @@ namespace WhatsThatMod
             previewBox = previewBox.ExpandedBy(-5);
             string rawText = "WTM_ExampleDescription".Translate();
             string template = ModCore.MakeTemplate(this);
-            string text = ModCore.MakeNewDescription(rawText, "Example Mod", template);
+            string text = ModCore.MakeNewDescription(rawText, "Example Mod", template, false);
             Widgets.Label(previewBox, text);
 
             listing.End();

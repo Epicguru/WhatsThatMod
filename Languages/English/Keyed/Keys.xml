@@ -53,7 +53,7 @@ You can check the debug log to see how long scanning patches took, and if you wo
 <WTM_UltraDeepMode>Deep patch scan</WTM_UltraDeepMode>
 <WTM_UltraDeepMode_Desc>By default this mod will scan patches to look added items, however it will only scan the 'top level' of patches to speed up loading.
 Enabling this option will make the entirety of all patches be scanned, which can be much slower but might catch some patched defs that would otherwise be missed.
-Recommended to leave it disabled, as it is unlikely to have any effect but will always slow down loading. </WTM_UltraDeepMode_Desc>
+Recommended to leave it disabled, as it is unlikely to have any effect but will always slow down loading.</WTM_UltraDeepMode_Desc>
 
 <WTM_CECompat>Combat Extended compatibility</WTM_CECompat>
 <WTM_CECompat_Desc>When enabled, the ammo stats will be added to the description of all combat extended ammunitions, making it easier to check ammo stats at a glance.</WTM_CECompat_Desc>

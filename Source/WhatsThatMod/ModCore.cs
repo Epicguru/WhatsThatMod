@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
@@ -85,18 +86,34 @@ namespace WhatsThatMod
 
         private static IEnumerable<Def> EnumerateAllDefs()
         {
-            foreach (var mod in LoadedModManager.RunningModsListForReading)
-            {
-                if (mod == null)
-                    continue;
+            bool fast = false;
 
-                foreach (var def in mod.AllDefs)
+            if (fast)
+            {
+                foreach (var mod in LoadedModManager.RunningModsListForReading)
+                {
+                    if (mod == null)
+                        continue;
+
+                    foreach (var def in mod.AllDefs)
+                        yield return def;
+                }
+
+                foreach (var def in LoadedModManager.PatchedDefsForReading)
+                {
                     yield return def;
+                }
             }
-
-            foreach (var def in LoadedModManager.PatchedDefsForReading)
+            else
             {
-                yield return def;
+                foreach (var type in GenDefDatabase.AllDefTypesWithDatabases())
+                {
+                    foreach(var def in (IEnumerable)GenGeneric.GetStaticPropertyOnGenericType(typeof(DefDatabase<>), type, "AllDefs"))
+                    {
+                        var finalDef =  def as Def;
+                        yield return finalDef;
+                    }
+                }
             }
         }
 
@@ -137,7 +154,6 @@ namespace WhatsThatMod
                     {
                         mcp = found;
                         fromPatched++;
-                        //Log.Message($"Patched def '{def.defName}' has been resolved as being part of '{mcp.Name}'");
                     }
                     else
                     {
@@ -157,12 +173,14 @@ namespace WhatsThatMod
                     if (currentDesc == null)
                         continue;
 
-                    string desc = MakeNewDescription(currentDesc, mcp.IsCoreMod ? vanillaName : mcp.Name, template);
+                    bool doCE = settings.CECompat && CE_Compat.IsCEInstalled && CE_Compat.AmmoDefType.IsInstanceOfType(def);
 
-                    if (settings.CECompat && CE_Compat.IsCEInstalled && CE_Compat.AmmoDefType.IsInstanceOfType(def))
+                    string desc = MakeNewDescription(currentDesc, mcp.IsCoreMod ? vanillaName : mcp.Name, template, doCE);
+
+                    if (doCE)
                     {
                         string ce = CE_Compat.GetProjectileReadout(def as ThingDef);
-                        desc += $"\n\n<color=#f0d90c><b>{"WTM_AmmoStats".Translate()}</b></color>\n{ce ?? "<null>"}";
+                        desc += $"\n\n<color=#f0d90c><b>{"WTM_AmmoStats".Translate()}</b></color>\n{ce ?? "<null>"}\n\n{CE_Ending}";
                     }
 
                     def.description = desc;
@@ -196,7 +214,6 @@ namespace WhatsThatMod
                     if (probablyAddedBy.ContainsKey(defName))
                         return;
                     probablyAddedBy.Add(defName, mcp);
-                    //Log.Message($"{defName} -> {mcp.Name}");
                 }
                 else
                 {
@@ -353,12 +370,23 @@ namespace WhatsThatMod
             return str.ToString();
         }
 
-        public static string MakeNewDescription(string currentDesc, string rawModName, string template)
+        private static string CE_Ending;
+        public static string MakeNewDescription(string currentDesc, string rawModName, string template, bool checkCE)
         {
             // Sanitize mod name.
             string modName = rawModName.Replace('[', '(').Replace(']', ')');
 
-            return currentDesc.TrimEnd() + string.Format(template, modName);
+            string current = currentDesc.TrimEnd();
+            if (checkCE)
+            {
+                CE_Ending ??= "CE_UsedBy".Translate() + ":";
+                if (current.EndsWith(CE_Ending))
+                {
+                    current = current.Substring(0, current.Length - CE_Ending.Length).TrimEnd();
+                }
+            }
+
+            return current + string.Format(template, modName);
         }
 
         public ModCore(ModContentPack mcp) : base(mcp)
