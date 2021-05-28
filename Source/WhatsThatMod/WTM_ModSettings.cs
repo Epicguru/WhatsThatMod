@@ -29,6 +29,7 @@ namespace WhatsThatMod
         public bool DetectPatched = true;
         public bool UltraDeepMode = false;
         public bool CECompat = true;
+        public bool ZooModeEnabled = false;
 
         public List<string> ExcludedMods = new List<string>();
         public List<string> ExcludedDefTypes = new List<string>();
@@ -80,6 +81,7 @@ namespace WhatsThatMod
             Scribe_Values.Look(ref DetectPatched, "DetectPatched", true);
             Scribe_Values.Look(ref UltraDeepMode, "UltraDeepMode", false);
             Scribe_Values.Look(ref CECompat, "CECompat", true);
+            Scribe_Values.Look(ref ZooModeEnabled, "ZooMode", false);
 
             Scribe_Collections.Look(ref ExcludedMods, "ExcludedMods", LookMode.Value);
             if (ExcludedMods == null)

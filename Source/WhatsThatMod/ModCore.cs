@@ -14,6 +14,11 @@ namespace WhatsThatMod
     {
         public static ModCore Instance { get; private set; }
 
+        public static bool DoZooHelper()
+        {
+            return Instance?.GetSettings<WTM_ModSettings>()?.ZooModeEnabled ?? true;
+        }
+
         public static void WriteToDefs()
         {
             // Find mod settings.

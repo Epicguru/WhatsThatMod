@@ -1,9 +1,7 @@
 ﻿using RimWorld;
 using System;
-using System.Collections;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
 using Verse;
 
 namespace WhatsThatMod
