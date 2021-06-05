@@ -61,5 +61,8 @@ Recommended to leave it disabled, as it is unlikely to have any effect but will 
 
 <WTM_LoadingMsg>(ノಠ益ಠ)ノ彡┻━┻ WHAT'S THAT MOD?!?</WTM_LoadingMsg>
 <WTM_LoadingMsgZoo>WHAT'S THAT ANIMAL!? ლ(ಠ益ಠლ)</WTM_LoadingMsgZoo>
+<WTM_ZooLabel>Zoo Mode</WTM_ZooLabel>
+<WTM_ZooDesc>Created for Mr. Samuel Streamer's Jorassic Park series and community challenge.
+Displays a 'zoo score' based on what tamed animals your colony has. Requires EdB Prepare Carefully to be installed.</WTM_ZooDesc>
 
 </LanguageData>

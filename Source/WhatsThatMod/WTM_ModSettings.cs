@@ -170,6 +170,8 @@ namespace WhatsThatMod
                 listing.CheckboxLabeled("WTM_UltraDeepMode".Translate(), ref UltraDeepMode, "WTM_UltraDeepMode_Desc".Translate());
                 GUI.enabled = true;
 
+                listing.CheckboxLabeled("WTM_ZooLabel".Translate(), ref ZooModeEnabled, "WTM_ZooDesc".Translate());
+
                 listing.Label("WTM_ExcludedMods".Translate(), tooltip: "WTM_ExcludedMods_Desc".Translate());
                 bool addNew = listing.ButtonText("WTM_AddNew".Translate());
                 bool removeBlank = listing.ButtonText("WTM_RemoveBlank".Translate());

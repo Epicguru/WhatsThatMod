@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<loadFolders>
+  <v1.2>
+    <li>/</li>
+    <li IfModActive="EdB.PrepareCarefully">ZooHelper</li>
+  </v1.2>
+</loadFolders>
