@@ -9,6 +9,7 @@ namespace ZooHelper
 {
     public class Main : Mod
     {
+        public static bool IsLoaded => database != null;
         public static readonly List<Pawn> CurrentAnimals = new List<Pawn>();
         public static readonly List<Pawn> AllTameAnimals = new List<Pawn>();
         public static double CurrentPoints { get; private set; }
@@ -21,18 +22,6 @@ namespace ZooHelper
         public Main(ModContentPack content) : base(content)
         {
             Log.Message($"<color=magenta>Loaded ZooHelper</color>");
-
-            try
-            {
-                // You're welcome.
-                if (SteamUtility.SteamPersonaName == "Mr Samuel Streamer")
-                    ModCore.Instance.GetSettings<WTM_ModSettings>().ZooModeEnabled = true;
-            }
-            catch
-            {
-                // Eh
-            }
-            
         }
 
         public static void Load()
@@ -98,11 +87,12 @@ namespace ZooHelper
                 }
             }
 
-            CurrentPoints = 0;
+            double p2 = 0;
             foreach (var animal in CurrentAnimals)
             {
-                CurrentPoints += GetAnimalPoints(animal);
+                p2 += GetAnimalPoints(animal);
             }
+            CurrentPoints = p2;
             CurrentAnimals.SortByDescending(GetAnimalPoints);
         }
 
@@ -139,7 +129,7 @@ namespace ZooHelper
         {
             if (database == null)
             {
-                Log.Warning("Called GetAnimalPoints but the database was not loaded, forced to load now.");
+                Log.Error("Called GetAnimalPoints but the database was not loaded, forced to load now.");
                 Load();
             }
 

@@ -30,6 +30,7 @@ namespace WhatsThatMod
         public bool UltraDeepMode = false;
         public bool CECompat = true;
         public bool ZooModeEnabled = false;
+        public bool ZooModeMultithread = true;
 
         public List<string> ExcludedMods = new List<string>();
         public List<string> ExcludedDefTypes = new List<string>();
@@ -82,6 +83,7 @@ namespace WhatsThatMod
             Scribe_Values.Look(ref UltraDeepMode, "UltraDeepMode", false);
             Scribe_Values.Look(ref CECompat, "CECompat", true);
             Scribe_Values.Look(ref ZooModeEnabled, "ZooMode", false);
+            Scribe_Values.Look(ref ZooModeMultithread, "ZooModeMultithread", true);
 
             Scribe_Collections.Look(ref ExcludedMods, "ExcludedMods", LookMode.Value);
             if (ExcludedMods == null)
@@ -171,6 +173,8 @@ namespace WhatsThatMod
                 GUI.enabled = true;
 
                 listing.CheckboxLabeled("WTM_ZooLabel".Translate(), ref ZooModeEnabled, "WTM_ZooDesc".Translate());
+                if(ZooModeEnabled)
+                    listing.CheckboxLabeled("WTM_ZooMultiLabel".Translate(), ref ZooModeMultithread, "WTM_ZooMultiDesc".Translate());
 
                 listing.Label("WTM_ExcludedMods".Translate(), tooltip: "WTM_ExcludedMods_Desc".Translate());
                 bool addNew = listing.ButtonText("WTM_AddNew".Translate());
@@ -190,7 +194,7 @@ namespace WhatsThatMod
                             i--;
                         }
                     }
-                }
+                }   
                 for(int i = 0; i < ExcludedMods.Count; i++)
                 {
                     var mod = ExcludedMods[i];

@@ -65,4 +65,8 @@ Recommended to leave it disabled, as it is unlikely to have any effect but will 
 <WTM_ZooDesc>Created for Mr. Samuel Streamer's Jorassic Park series and community challenge.
 Displays a 'zoo score' based on what tamed animals your colony has. Requires EdB Prepare Carefully to be installed.</WTM_ZooDesc>
 
+<WTM_ZooMultiLabel>Multithreaded Zoo Counter</WTM_ZooMultiLabel>
+<WTM_ZooMultiDesc>If enabled, the zoo score calculation will run on a background thread, greatly reducing framerate lag spikes. However, it may cause errors.
+If the score does not work as expected, warnings appear in the debug log, or the score stops updating, disable this option.</WTM_ZooMultiDesc>
+
 </LanguageData>

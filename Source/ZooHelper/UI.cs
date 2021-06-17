@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 using WhatsThatMod;
@@ -15,8 +17,35 @@ namespace ZooHelper
         {
             tickCounter++;
 
-            if (tickCounter % (60 * 10) == 0)
-                Main.Recalculate();
+            float multi = Find.TickManager.TickRateMultiplier;
+            if (multi < 1)
+                multi = 1;
+
+            if (tickCounter % Mathf.RoundToInt(60 * 10 * multi) == 0)
+            {
+                if (ModCore.DoMultithread())
+                {
+                    if (!Main.IsLoaded)
+                        Main.Load();
+
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            Main.Recalculate();
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Warning("Exception during zoo score recalculation. If you see this error a lot, disable multithreading in mod settings.");
+                            Log.Warning(e.ToString());
+                        }
+                    });
+                }
+                else
+                {
+                    Main.Recalculate();
+                }
+            }
         }
 
         public override void GameComponentOnGUI()
@@ -55,6 +84,8 @@ namespace ZooHelper
 
     public class MyWindow : Window
     {
+        Listing_Standard listing = new Listing_Standard();
+
         public MyWindow()
         {
             doCloseButton = true;
@@ -66,7 +97,6 @@ namespace ZooHelper
 
         public override void DoWindowContents(Rect rect)
         {
-            Listing_Standard listing = new Listing_Standard();
             listing.Begin(new Rect(rect.x, rect.y, rect.width, rect.height));
             listing.Label("<i><color=cyan>Added by What's That Mod. Can be turned on or off in mod settings.</color></i>");
             listing.Gap();
@@ -75,6 +105,7 @@ namespace ZooHelper
             listing.Label("<i>Note: Does not include bonus achievement points, so calculate those yourself!</i>");
             listing.GapLine();
             listing.Label($"Point-giving animals ({Main.CurrentAnimals.Count}):");
+            StringBuilder str = new StringBuilder();
             foreach (var animal in Main.CurrentAnimals)
             {
                 if (animal == null || animal.Dead)
@@ -87,9 +118,11 @@ namespace ZooHelper
                 string mid = "";
                 if (remaining > 0)
                     mid = new string('.', remaining);
-                listing.Label(root + mid + end);
+                str.AppendLine(root + mid + end);
                 
             }
+
+            listing.Label(str.ToString(), rect.height - listing.CurHeight - 45);
             listing.End();
         }
     }

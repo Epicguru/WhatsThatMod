@@ -19,6 +19,11 @@ namespace WhatsThatMod
             return Instance?.GetSettings<WTM_ModSettings>()?.ZooModeEnabled ?? true;
         }
 
+        public static bool DoMultithread()
+        {
+            return Instance?.GetSettings<WTM_ModSettings>()?.ZooModeMultithread ?? true;
+        }
+
         public static void WriteToDefs()
         {
             // Find mod settings.
