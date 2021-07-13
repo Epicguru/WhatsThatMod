@@ -29,9 +29,7 @@ namespace WhatsThatMod
         {
             ammoStat ??= StatDef.Named("AmmoCaliber");
             if (ammoStat == null)
-            {
                 return "Error generating stats. Please report this bug.";
-            }
 
             // Incoming: reflection hell.
 
