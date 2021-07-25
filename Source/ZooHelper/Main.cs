@@ -1,4 +1,5 @@
-﻿using EdB.PrepareCarefully;
+﻿using System;
+using EdB.PrepareCarefully;
 using RimWorld;
 using System.Collections.Generic;
 using System.Reflection;
@@ -51,37 +52,44 @@ namespace ZooHelper
                         if (thing == null || thing.Destroyed)
                             continue;
 
-                        Pawn pawn = null;
-                        if (thing is Building_Casket casket)
+                        try
                         {
-                            if (casket.ContainedThing is Pawn p)
-                                pawn = p;
-                        }
-                        else if (thing is Pawn p)
-                        {
-                            pawn = p;
-                        }
-
-                        if (pawn == null)
-                            continue;
-
-                        if (pawn.RaceProps.Animal)
-                        {
-                            double points = GetAnimalPoints(pawn);
-                            if (points > 0)
+                            Pawn pawn = null;
+                            if (thing is Building_Casket casket)
                             {
-                                AllTameAnimals.Add(pawn);
-                                if (animalsByDef.TryGetValue(pawn.def, out var pair))
-                                {
-                                    if (pair.points < points)
-                                        CurrentAnimals.Remove(pair.animal);
-                                    else
-                                        continue;
-                                }
-
-                                animalsByDef[pawn.def] = (pawn, points);
-                                CurrentAnimals.Add(pawn);
+                                if (casket.ContainedThing is Pawn p)
+                                    pawn = p;
                             }
+                            else if (thing is Pawn p)
+                            {
+                                pawn = p;
+                            }
+
+                            if (pawn == null)
+                                continue;
+
+                            if (pawn.RaceProps.Animal)
+                            {
+                                double points = GetAnimalPoints(pawn);
+                                if (points > 0)
+                                {
+                                    AllTameAnimals.Add(pawn);
+                                    if (animalsByDef.TryGetValue(pawn.def, out var pair))
+                                    {
+                                        if (pair.points < points)
+                                            CurrentAnimals.Remove(pair.animal);
+                                        else
+                                            continue;
+                                    }
+
+                                    animalsByDef[pawn.def] = (pawn, points);
+                                    CurrentAnimals.Add(pawn);
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            // Fuck it.
                         }
                     }
                 }
@@ -104,7 +112,7 @@ namespace ZooHelper
             if (animal.training == null)
                 return 0;
 
-            if (!animal.Faction.IsPlayer)
+            if (!(animal.Faction?.IsPlayer ?? false))
                 return 0;
 
             bool isWild = true;
