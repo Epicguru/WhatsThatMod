@@ -13,16 +13,16 @@
 
 	<ItemGroup Condition="'$(Configuration)'=='v1.3'">
 		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.3.3389" />
+		<Reference Include="0ColourPicker">
+			<HintPath>0ColourPicker13.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(Configuration)'=='v1.4'">
-		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.4.3507-beta" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Reference Include="0ColourPicker">
-	    <HintPath>0ColourPicker.dll</HintPath>
-	  </Reference>
+		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.4.3528" />
+		<Reference Include="0ColourPicker">
+			<HintPath>0ColourPicker14.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='v1.3'">
