@@ -204,7 +204,7 @@ public class WTM_ModSettings : ModSettings
             return;
 
         var currentColor = GetFontColor();
-        var dialog = new Dialog_ColourPicker(currentColor, (newColor) =>
+        var dialog = new Dialog_ColourPicker(currentColor, newColor =>
         {
             ColorHex = ColorUtility.ToHtmlStringRGBA(newColor);
         });
