@@ -11,17 +11,17 @@ public class WTM_ModSettings : ModSettings
 {
     public bool IsBroken => VanillaName == null;
 
-    public bool FlagVanilla = false;
+    public bool FlagVanilla;
     public string VanillaName = "Rimworld";
 
     public string Format = "{0}";
     public bool Italics = true;
-    public bool Bold = false;
+    public bool Bold;
     public int CustomSize = 0;
     public string ColorHex = "66E0E4FF";
     public int BlankLines = 1;
     public bool DetectPatched = true;
-    public bool UltraDeepMode = false;
+    public bool UltraDeepMode;
     public bool CECompat = true;
 
     public List<string> ExcludedMods = new List<string>();
@@ -75,11 +75,9 @@ public class WTM_ModSettings : ModSettings
         Scribe_Values.Look(ref CECompat, "CECompat", true);
 
         Scribe_Collections.Look(ref ExcludedMods, "ExcludedMods", LookMode.Value);
-        if (ExcludedMods == null)
-            ExcludedMods = new List<string>();
+        ExcludedMods ??= new List<string>();
         Scribe_Collections.Look(ref ExcludedDefTypes, "ExcludedDefTypes", LookMode.Value);
-        if (ExcludedDefTypes == null)
-            ExcludedDefTypes = new List<string>();
+        ExcludedDefTypes ??= new List<string>();
 
         base.ExposeData();
     }
@@ -200,15 +198,17 @@ public class WTM_ModSettings : ModSettings
 
     private void OpenColorPicker()
     {
-        if (colorPicker != null && colorPicker.IsOpen)
+        if (colorPicker is { IsOpen: true })
             return;
 
         var currentColor = GetFontColor();
         var dialog = new Dialog_ColourPicker(currentColor, newColor =>
         {
             ColorHex = ColorUtility.ToHtmlStringRGBA(newColor);
-        });
-        dialog.minimalistic = true;
+        })
+        {
+            minimalistic = true
+        };
         colorPicker = dialog;
         Find.WindowStack.Add(dialog);
     }
