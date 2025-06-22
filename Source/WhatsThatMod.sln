@@ -10,6 +10,7 @@ Global
 		v1.3|Any CPU = v1.3|Any CPU
 		v1.4|Any CPU = v1.4|Any CPU
 		v1.5|Any CPU = v1.5|Any CPU
+		v1.6|Any CPU = v1.6|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{FBFF47ED-E649-4779-A1DB-B05362185780}.v1.3|Any CPU.ActiveCfg = v1.3|Any CPU
@@ -18,6 +19,8 @@ Global
 		{FBFF47ED-E649-4779-A1DB-B05362185780}.v1.4|Any CPU.Build.0 = v1.4|Any CPU
 		{FBFF47ED-E649-4779-A1DB-B05362185780}.v1.5|Any CPU.ActiveCfg = v1.5|Any CPU
 		{FBFF47ED-E649-4779-A1DB-B05362185780}.v1.5|Any CPU.Build.0 = v1.5|Any CPU
+		{FBFF47ED-E649-4779-A1DB-B05362185780}.v1.6|Any CPU.ActiveCfg = v1.6|Any CPU
+		{FBFF47ED-E649-4779-A1DB-B05362185780}.v1.6|Any CPU.Build.0 = v1.6|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
